@@ -1,0 +1,19 @@
+ETHEREUM_RPC_URL=https://rpc-eth.node9x.com
+CONSENSUS_BEACON_URL=https://beacon-eth.node9x.com
+VALIDATOR_PRIVATE_KEYS=0x54b9da85b2b61d67b347e9c26fbd4b99a07ee02cf575fd746572d6a89d633f95
+COINBASE=0x7d5CB4553167F3cca419832d0C69e04DC80C8479
+P2P_IP=148.251.66.35
+
+# Backup RPC URLs (comma-separated, required)
+# Add your backup Ethereum RPC endpoints here
+BACKUP_ETHEREUM_RPCS=https://eth.llamarpc.com,https://rpc.ankr.com/eth,https://eth.drpc.org,https://ethereum.publicnode.com
+
+# Backup Beacon URLs (comma-separated, required)
+# Add your backup Consensus Beacon endpoints here
+BACKUP_BEACON_URLS=https://ethereum-beacon-api.publicnode.com,https://beaconstate.ethstaker.cc
+
+# Telegram Notification (Optional)
+# Get your bot token from @BotFather on Telegram
+# Get your chat ID from @userinfobot on Telegram
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_CHAT_ID=your_chat_id_here
