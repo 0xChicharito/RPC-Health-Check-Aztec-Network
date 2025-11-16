@@ -22,7 +22,7 @@ INSTALL_DIR=$(pwd)
 clear
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║                                                          ║${NC}"
-echo -e "${CYAN}║${BOLD}        RPC Health Check Monitor - Auto Installer${NC}${CYAN}        ║${NC}"
+echo -e "${CYAN}║${BOLD}      RPC Health Check Monitor - Auto Installer${NC}${CYAN}      ║${NC}"
 echo -e "${CYAN}║                                                          ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
@@ -371,7 +371,7 @@ TELEGRAM_TOKEN=$(grep "^TELEGRAM_BOT_TOKEN=" .env 2>/dev/null | cut -d '=' -f2)
 DOCKER_RESTART=$(grep "^DOCKER_COMPOSE_RESTART=" .env 2>/dev/null | cut -d '=' -f2)
 
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║              CONFIGURATION SUMMARY                       ║${NC}"
+echo -e "${CYAN}║                 CONFIGURATION SUMMARY                  ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Installation Location:"
@@ -402,7 +402,7 @@ fi
 echo ""
 
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║                  QUICK COMMANDS                          ║${NC}"
+echo -e "${CYAN}║                    QUICK COMMANDS                      ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Monitor logs in real-time:"
