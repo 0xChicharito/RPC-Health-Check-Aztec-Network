@@ -5,10 +5,10 @@
 # Auto-restore original RPC when recovered
 
 # ===== CONFIGURATION =====
-ENV_FILE=".env"  # Path to configuration file
+ENV_FILE="/root/aztec/.env"  # Path to configuration file
 TIMEOUT=10       # Timeout for each request (seconds)
 MAX_RETRIES=3    # Number of retries before replacing
-ORIGINAL_RPC_FILE=".original_rpc"  # File to store original RPC
+ORIGINAL_RPC_FILE="/root/aztec/.original_rpc"  # File to store original RPC
 
 # ===== TELEGRAM CONFIGURATION =====
 # Set these in .env file or export as environment variables:
