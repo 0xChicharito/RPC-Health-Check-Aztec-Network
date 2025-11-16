@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# RPC Health Check - Simple Installer
-# Version: 2.0
+# RPC Health Check - Installer for existing directory
+# Works with existing .env file in current directory
 
 set -e
 
@@ -13,29 +13,33 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Config
-INSTALL_DIR="${INSTALL_DIR:-$HOME/rpc-health-check}"
 REPO_URL="https://raw.githubusercontent.com/0xChicharito/rpc-health-check/main"
+CURRENT_DIR=$(pwd)
 
 echo -e "${BLUE}════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}  RPC Health Check - Auto Installer${NC}"
+echo -e "${BLUE}  RPC Health Check - Quick Installer${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════${NC}"
 echo ""
+echo "Installation directory: $CURRENT_DIR"
+echo ""
 
-# Create directory
-echo "Creating installation directory..."
-mkdir -p "$INSTALL_DIR"
-cd "$INSTALL_DIR"
-echo -e "${GREEN}✓${NC} Directory: $INSTALL_DIR"
+# Check if .env exists
+if [ ! -f ".env" ]; then
+    echo -e "${YELLOW}⚠${NC} Warning: .env file not found in current directory"
+    echo "This script requires an existing .env file"
+    exit 1
+fi
+
+echo -e "${GREEN}✓${NC} Found .env file"
 echo ""
 
 # Download files
-echo "Downloading files from GitHub..."
+echo "Downloading monitoring scripts..."
 echo ""
 
 FILES=(
     "rpc_health_check.sh"
     "setup_cron.sh"
-    ".env.example"
 )
 
 DOWNLOAD_SUCCESS=0
@@ -57,17 +61,9 @@ echo ""
 if [ $DOWNLOAD_FAILED -gt 0 ]; then
     echo -e "${RED}✗ Failed to download $DOWNLOAD_FAILED file(s)${NC}"
     echo ""
-    echo "Possible reasons:"
-    echo "  1. Files not yet uploaded to GitHub repository"
-    echo "  2. Repository URL is incorrect"
-    echo "  3. Network connection issues"
-    echo ""
-    echo "Please verify files exist at:"
-    echo "  $REPO_URL"
-    echo ""
-    echo "Manual installation:"
-    echo "  cd $INSTALL_DIR"
-    echo "  # Download files manually or copy them here"
+    echo "Manual download:"
+    echo "  curl -O $REPO_URL/rpc_health_check.sh"
+    echo "  curl -O $REPO_URL/setup_cron.sh"
     exit 1
 fi
 
@@ -81,35 +77,24 @@ chmod +x setup_cron.sh 2>/dev/null || true
 echo -e "${GREEN}✓${NC} Permissions set"
 echo ""
 
-# Setup .env
-if [ ! -f ".env" ]; then
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo -e "${GREEN}✓${NC} Created .env from .env.example"
-    else
-        echo "Creating .env template..."
-        cat > .env << 'ENVEOF'
-ETHEREUM_RPC_URL=https://xxxxxx.node9x.com
-CONSENSUS_BEACON_URL=https://xxxxxxxx.node9x.com
-VALIDATOR_PRIVATE_KEYS=0x54b9da85b2b61d67b3xxxxxxxxxxxxxx
-COINBASE=0x7d5CB4553167F3cca419832dxxxxx
-P2P_IP=148.251.66.35
+# Check if backup RPC configuration exists in .env
+if ! grep -q "^BACKUP_ETHEREUM_RPCS=" .env; then
+    echo -e "${YELLOW}⚠${NC} Adding backup RPC configuration to .env..."
+    cat >> .env << 'EOF'
 
-# Backup RPC URLs (comma-separated, required)
+# Backup RPC URLs (comma-separated, required for RPC health check)
 BACKUP_ETHEREUM_RPCS=https://eth.llamarpc.com,https://rpc.ankr.com/eth,https://eth.drpc.org,https://ethereum.publicnode.com
 
-# Backup Beacon URLs (comma-separated, required)
+# Backup Beacon URLs (comma-separated, required for RPC health check)
 BACKUP_BEACON_URLS=https://ethereum-beacon-api.publicnode.com,https://beaconstate.ethstaker.cc
 
 # Telegram Notification (Optional)
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
-ENVEOF
-        echo -e "${GREEN}✓${NC} Created .env template"
-    fi
-    chmod 600 .env
+EOF
+    echo -e "${GREEN}✓${NC} Backup RPC configuration added to .env"
 else
-    echo -e "${YELLOW}⚠${NC} .env already exists, keeping current version"
+    echo -e "${GREEN}✓${NC} Backup RPC configuration already exists in .env"
 fi
 echo ""
 
@@ -118,20 +103,19 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  Installation Complete! 🎉${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════${NC}"
 echo ""
-echo "Installation directory: $INSTALL_DIR"
+echo "Files installed in: $CURRENT_DIR"
 echo ""
 echo "Next steps:"
-echo "  1. Edit configuration:"
-echo "     nano $INSTALL_DIR/.env"
 echo ""
-echo "  2. Run test:"
-echo "     cd $INSTALL_DIR && ./rpc_health_check.sh"
+echo "  1. Configure backup RPCs (if needed):"
+echo "     nano .env"
+echo "     # Edit BACKUP_ETHEREUM_RPCS and BACKUP_BEACON_URLS"
+echo ""
+echo "  2. Run manual check:"
+echo "     ./rpc_health_check.sh"
 echo ""
 echo "  3. Setup automatic monitoring:"
-echo "     cd $INSTALL_DIR && ./setup_cron.sh"
+echo "     ./setup_cron.sh"
 echo ""
-echo "Quick start:"
-echo "  cd $INSTALL_DIR"
-echo "  nano .env          # Configure your RPCs"
-echo "  ./setup_cron.sh    # Setup auto-monitoring"
+echo "The script will use RPC URLs from your existing .env file."
 echo ""
