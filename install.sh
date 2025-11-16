@@ -38,12 +38,6 @@ print_warning() {
     echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then 
-    print_warning "Please do not run this script as root"
-    exit 1
-fi
-
 # Check required commands
 echo "Checking system requirements..."
 REQUIRED_COMMANDS=("curl" "grep" "sed")
