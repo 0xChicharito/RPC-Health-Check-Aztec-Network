@@ -5,10 +5,11 @@
 # Auto-restore original RPC when recovered
 
 # ===== CONFIGURATION =====
-ENV_FILE="/root/aztec/.env"  # Path to configuration file
+ENV_FILE=".env"  # Path to configuration file (in current directory)
 TIMEOUT=10       # Timeout for each request (seconds)
 MAX_RETRIES=3    # Number of retries before replacing
-ORIGINAL_RPC_FILE="/root/aztec/.original_rpc"  # File to store original RPC
+ORIGINAL_RPC_FILE=".original_rpc"  # File to store original RPC
+LOG_FILE="rpc_health_check.log"  # Log file in current directory
 
 # ===== TELEGRAM CONFIGURATION =====
 # Set these in .env file or export as environment variables:
@@ -43,6 +44,95 @@ LOG_FILE="rpc_health_check.log"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# ===== PROMPT FOR RPC URLs IF NOT IN .ENV =====
+prompt_for_rpcs() {
+    local need_eth_rpc=false
+    local need_beacon=false
+    local need_backup_eth=false
+    local need_backup_beacon=false
+    
+    # Check what's missing
+    if [ -z "$(read_env_value 'ETHEREUM_RPC_URL')" ]; then
+        need_eth_rpc=true
+    fi
+    
+    if [ -z "$(read_env_value 'CONSENSUS_BEACON_URL')" ]; then
+        need_beacon=true
+    fi
+    
+    if [ -z "$(read_env_value 'BACKUP_ETHEREUM_RPCS')" ]; then
+        need_backup_eth=true
+    fi
+    
+    if [ -z "$(read_env_value 'BACKUP_BEACON_URLS')" ]; then
+        need_backup_beacon=true
+    fi
+    
+    # If nothing is missing, return
+    if [ "$need_eth_rpc" = false ] && [ "$need_beacon" = false ] && [ "$need_backup_eth" = false ] && [ "$need_backup_beacon" = false ]; then
+        return 0
+    fi
+    
+    # Prompt for missing values
+    echo "════════════════════════════════════════════════"
+    echo "  RPC Configuration Required"
+    echo "════════════════════════════════════════════════"
+    echo ""
+    
+    if [ "$need_eth_rpc" = true ]; then
+        echo "Enter your Ethereum RPC URL:"
+        read -p "> " eth_rpc
+        if [ -n "$eth_rpc" ]; then
+            echo "ETHEREUM_RPC_URL=$eth_rpc" >> "$ENV_FILE"
+            log "✓ Ethereum RPC URL added to .env"
+        fi
+        echo ""
+    fi
+    
+    if [ "$need_beacon" = true ]; then
+        echo "Enter your Consensus Beacon URL:"
+        read -p "> " beacon_url
+        if [ -n "$beacon_url" ]; then
+            echo "CONSENSUS_BEACON_URL=$beacon_url" >> "$ENV_FILE"
+            log "✓ Consensus Beacon URL added to .env"
+        fi
+        echo ""
+    fi
+    
+    if [ "$need_backup_eth" = true ]; then
+        echo "Enter backup Ethereum RPC URLs (comma-separated):"
+        echo "Example: https://eth.llamarpc.com,https://rpc.ankr.com/eth"
+        read -p "> " backup_eth
+        if [ -n "$backup_eth" ]; then
+            echo "BACKUP_ETHEREUM_RPCS=$backup_eth" >> "$ENV_FILE"
+            log "✓ Backup Ethereum RPCs added to .env"
+        else
+            # Use defaults
+            echo "BACKUP_ETHEREUM_RPCS=https://eth.llamarpc.com,https://rpc.ankr.com/eth,https://eth.drpc.org" >> "$ENV_FILE"
+            log "✓ Default backup Ethereum RPCs added to .env"
+        fi
+        echo ""
+    fi
+    
+    if [ "$need_backup_beacon" = true ]; then
+        echo "Enter backup Beacon URLs (comma-separated):"
+        echo "Example: https://ethereum-beacon-api.publicnode.com"
+        read -p "> " backup_beacon
+        if [ -n "$backup_beacon" ]; then
+            echo "BACKUP_BEACON_URLS=$backup_beacon" >> "$ENV_FILE"
+            log "✓ Backup Beacon URLs added to .env"
+        else
+            # Use defaults
+            echo "BACKUP_BEACON_URLS=https://ethereum-beacon-api.publicnode.com,https://beaconstate.ethstaker.cc" >> "$ENV_FILE"
+            log "✓ Default backup Beacon URLs added to .env"
+        fi
+        echo ""
+    fi
+    
+    echo "✓ Configuration saved to .env"
+    echo ""
 }
 
 # ===== TELEGRAM NOTIFICATION =====
@@ -300,8 +390,12 @@ main() {
     
     if [ ! -f "$ENV_FILE" ]; then
         log "✗ File $ENV_FILE does not exist!"
+        echo "Please create .env file in current directory first"
         exit 1
     fi
+    
+    # Prompt for RPC URLs if not in .env
+    prompt_for_rpcs
     
     # Load Telegram configuration
     load_telegram_config
@@ -312,6 +406,11 @@ main() {
     # Read current configuration
     CURRENT_ETH_RPC=$(read_env_value "ETHEREUM_RPC_URL")
     CURRENT_BEACON=$(read_env_value "CONSENSUS_BEACON_URL")
+    
+    if [ -z "$CURRENT_ETH_RPC" ] || [ -z "$CURRENT_BEACON" ]; then
+        log "✗ RPC URLs not configured in .env file"
+        exit 1
+    fi
     
     log "Current configuration:"
     log "  - ETH RPC: $CURRENT_ETH_RPC"
