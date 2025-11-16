@@ -74,10 +74,10 @@ BACKUP_BEACON_URLS=https://your-backup-beacon.com
 ════════════════════════════════════════════════
 
 Enter your Ethereum RPC URL:
-> https://rpc-eth.node9x.com
+> https://xxxxxx.node9x.com
 
 Enter your Consensus Beacon URL:
-> https://beacon-eth.node9x.com
+> https://xxxxx.node9x.com
 
 Enter backup Ethereum RPC URLs (comma-separated):
 > https://eth.llamarpc.com,https://rpc.ankr.com/eth
