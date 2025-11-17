@@ -24,6 +24,7 @@ Automatically monitor Ethereum RPC and Consensus Beacon health, replace with bac
 ## For users with existing .env file (like /root/aztec)
 
 ```bash
+cd $HOME && cd aztec 
 curl -O https://raw.githubusercontent.com/0xChicharito/aztec-rpc-monitor/main/install.sh && chmod +x install.sh && ./install.sh
 ```
 That's it! 🚀
